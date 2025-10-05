@@ -1,0 +1,40 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [python, go]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps
+        if: matrix.language == 'python'
+        run: pip install -r requirements.txt
+
+      - name: Run Python Tests
+        if: matrix.language == 'python'
+        run: pytest
+
+      - name: Set up Go
+        if: matrix.language == 'go'
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
+
+      - name: Run Go Tests
+        if: matrix.language == 'go'
+        run: go test ./...
