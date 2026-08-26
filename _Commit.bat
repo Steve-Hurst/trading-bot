@@ -6,5 +6,5 @@ git add -A
 git commit -m "Auto-commit"
 git push
 echo Hydrating code warehouse...
-"C:\Batch\Shared\CodeScrapper.exe" -bl-actions="hyrdateCodebaseWarehouseFolders" -folders="%CD%"
+"C:\Batch\bin\CodeScrapper.exe" -bl-actions="hyrdateCodebaseWarehouseFolders" -folders="%CD%"
 endlocal
