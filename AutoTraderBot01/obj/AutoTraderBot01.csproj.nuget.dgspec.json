@@ -8,7 +8,7 @@
       "version": "1.0.0",
       "restore": {
         "projectUniqueName": "E:\\GDrive\\c#\\trading-bot\\AutoTraderBot01\\AutoTraderBot01.csproj",
-        "projectName": "AutoTraderBot01",
+        "projectName": "cookie.autotrader-bot01",
         "projectPath": "E:\\GDrive\\c#\\trading-bot\\AutoTraderBot01\\AutoTraderBot01.csproj",
         "packagesPath": "C:\\Users\\Steve\\.nuget\\packages\\",
         "outputPath": "E:\\GDrive\\c#\\trading-bot\\AutoTraderBot01\\obj\\",
@@ -53,6 +53,12 @@
             "Microsoft.Data.SqlClient": {
               "target": "Package",
               "version": "[7.0.2, )"
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.19, )",
+              "autoReferenced": true
             }
           },
           "imports": [
@@ -72,6 +78,11 @@
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.317/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
         }
       }
     }
