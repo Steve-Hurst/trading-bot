@@ -51,7 +51,7 @@ namespace Logging
             // Initialize SQL connection string from Secrets or default local instance
             string dbServer = GetSecrets.GetSecret("SQL-AI-SERVER");
             if (string.IsNullOrEmpty(dbServer)) dbServer = GetSecrets.GetSecret("SQL-EQUITIES-SERVER");
-            if (string.IsNullOrEmpty(dbServer)) dbServer = "localhost";
+            if (string.IsNullOrEmpty(dbServer)) dbServer = @"COOKIE\SHARES";
 
             string dbName = GetSecrets.GetSecret("SQL-AI-DATABASE");
             if (string.IsNullOrEmpty(dbName)) dbName = "AIv1";
