@@ -9,10 +9,49 @@ set "PROJ_DIR=%~dp0"
 set "APP_NAME=cookie.autotrader-bot01"
 set "BIN_DIR=%PROJ_DIR%bin"
 
-echo %DATE% %TIME% Building %APP_NAME%...
-echo %DATE% %TIME% Building %APP_NAME%...>>"%LOG_DIR%\%LOG_FILE%"
+echo %DATE% %TIME% Extracting Git metadata for %APP_NAME%...
+echo %DATE% %TIME% Extracting Git metadata for %APP_NAME%...>>"%LOG_DIR%\%LOG_FILE%"
 
 cd /d "%PROJ_DIR%"
+
+set "GIT_SHA=unknown"
+for /f "tokens=*" %%a in ('git rev-parse HEAD 2^>nul') do set "GIT_SHA=%%a"
+
+set "GIT_BRANCH=unknown"
+for /f "tokens=*" %%b in ('git branch --show-current 2^>nul') do set "GIT_BRANCH=%%b"
+
+set "GIT_LABEL=unknown"
+for /f "tokens=*" %%c in ('git describe --tags --always 2^>nul') do set "GIT_LABEL=%%c"
+
+set "BUILD_DATE=%DATE% %TIME%"
+
+echo Generating AutoTraderBot01\buildinfo.cs (SHA: !GIT_SHA!, Branch: !GIT_BRANCH!, Label: !GIT_LABEL!)...
+
+(
+echo // Auto-generated buildinfo for %APP_NAME%
+echo using System;
+echo.
+echo namespace Config
+echo {
+echo     public static class BuildInfo
+echo     {
+echo         public const string AppName = "%APP_NAME%";
+echo         public const string AlgorithmName = "EURUSD_MeanReversion_RSI_BB";
+echo         public const string Version = "1.0.0.0";
+echo         public const string BuildDate = "!BUILD_DATE!";
+echo         public const string GitCommitSha = "!GIT_SHA!";
+echo         public const string GitBranch = "!GIT_BRANCH!";
+echo         public const string GitLabel = "!GIT_LABEL!";
+echo         public const string CookieControlToken = "0000000000000000000000000000000000000000000000000000000000000000";
+echo         public const int DefaultPort = 9011;
+echo         public const string ServiceName = "%APP_NAME%";
+echo         public const string ServiceDescription = "Steve Hurst AutoTrader Bot 01 - EURUSD Mean Reversion Pepperstone Execution Engine";
+echo     }
+echo }
+) > "%PROJ_DIR%AutoTraderBot01\buildinfo.cs"
+
+echo %DATE% %TIME% Building %APP_NAME%...
+echo %DATE% %TIME% Building %APP_NAME%...>>"%LOG_DIR%\%LOG_FILE%"
 
 dotnet publish AutoTraderBot01\AutoTraderBot01.csproj -c Release -r win-x64 -p:PublishSingleFile=true --self-contained false -o "%BIN_DIR%" >>"%LOG_DIR%\%LOG_FILE%" 2>&1
 if errorlevel 1 (

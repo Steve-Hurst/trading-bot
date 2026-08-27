@@ -21,11 +21,15 @@ namespace Logging
         {
             public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
             public string SourceSystem { get; set; } = BuildInfo.AppName;
+            public string AlgorithmName { get; set; } = BuildInfo.AlgorithmName;
+            public string AlgorithmVersion { get; set; } = BuildInfo.Version;
             public string Runtime { get; set; } = "csharp_net9";
             public string LogLevel { get; set; } = "INFO";
             public string Exchange { get; set; } = "Pepperstone";
             public string Symbol { get; set; } = "EURUSD";
             public string GitCommitSha { get; set; } = BuildInfo.GitCommitSha;
+            public string GitBranch { get; set; } = BuildInfo.GitBranch;
+            public string GitLabel { get; set; } = BuildInfo.GitLabel;
             public string StrategyFunction { get; set; } = "General";
             public string ExecutionId { get; set; } = string.Empty;
             public string Message { get; set; } = string.Empty;
@@ -103,7 +107,7 @@ namespace Logging
             string consoleLine = $"[{entry.TimestampUtc:yyyy-MM-dd HH:mm:ss.fff}] [{entry.LogLevel}] [{strategyFunction}] {message}";
             if (latencyMs > 0 || spreadPips > 0)
             {
-                consoleLine += $" | Latency: {latencyMs:F1}ms, Spread: {spreadPips:F2}p, DD: {drawdownPct:F2}%";
+                consoleLine += $" | Latency: {latencyMs:F1}ms, Spread: {spreadPips:F2}p, DD: {drawdownPct:F2}% | Git: {BuildInfo.GitLabel}";
             }
             Console.WriteLine(consoleLine);
 
@@ -120,6 +124,102 @@ namespace Logging
         {
             string fullMsg = ex == null ? message : $"{message} | Ex: {ex.Message} | Stack: {ex.StackTrace}";
             Log("ERROR", function, fullMsg, extra: extra);
+        }
+
+        public async Task RecordBotMetricsAsync(AccountSummary account, int openPositionsCount, double avgLatency, double avgSpread, double avgSlippage, long totalTicks, object? indicatorState = null)
+        {
+            try
+            {
+                var metricSnapshot = new
+                {
+                    timestamp_utc = DateTime.UtcNow,
+                    bot_id = BuildInfo.AppName,
+                    algorithm_name = BuildInfo.AlgorithmName,
+                    algorithm_version = BuildInfo.Version,
+                    git_commit_sha = BuildInfo.GitCommitSha,
+                    git_branch = BuildInfo.GitBranch,
+                    git_label = BuildInfo.GitLabel,
+                    exchange = "Pepperstone",
+                    symbol = "EURUSD",
+                    account_balance = account.Balance,
+                    account_equity = account.Equity,
+                    used_margin = account.UsedMargin,
+                    free_margin = account.FreeMargin,
+                    margin_level_pct = account.MarginLevelPct,
+                    peak_equity = account.PeakEquity,
+                    drawdown_pct = account.DrawdownPct,
+                    daily_realized_pnl = account.DailyRealizedPnL,
+                    total_trades_today = account.TotalTradesToday,
+                    winning_trades = account.WinningTradesToday,
+                    losing_trades = account.LosingTradesToday,
+                    win_rate_pct = account.WinRatePct,
+                    open_positions_count = openPositionsCount,
+                    avg_latency_ms = avgLatency,
+                    avg_spread_pips = avgSpread,
+                    avg_slippage_pips = avgSlippage,
+                    total_ticks_processed = totalTicks,
+                    indicators = indicatorState
+                };
+
+                string snapshotJson = JsonSerializer.Serialize(metricSnapshot, new JsonSerializerOptions { WriteIndented = true });
+
+                // 1. Write to local metrics JSON file
+                string metricsFilePath = Path.Combine(_logDir, $"metrics_{DateTime.UtcNow:yyyyMMdd}.json");
+                await File.AppendAllTextAsync(metricsFilePath, snapshotJson + Environment.NewLine);
+
+                // 2. Insert into [AIv1].[dbo].[BotMetrics]
+                const string query = @"
+                IF OBJECT_ID('[AIv1].[dbo].[BotMetrics]', 'U') IS NOT NULL
+                BEGIN
+                    INSERT INTO [AIv1].[dbo].[BotMetrics]
+                    (TimestampUTC, BotID, AlgorithmName, AlgorithmVersion, GitCommitSHA, GitBranch, GitLabel, Exchange, Symbol,
+                     AccountBalance, AccountEquity, UsedMargin, FreeMargin, MarginLevelPct, PeakEquity, DrawdownPct, DailyRealizedPnL,
+                     TotalTradesToday, WinningTrades, LosingTrades, WinRatePct, OpenPositionsCount,
+                     AvgLatencyMs, AvgSpreadPips, AvgSlippagePips, TotalTicksProcessed, MetricsJSON)
+                    VALUES
+                    (@TimestampUTC, @BotID, @AlgorithmName, @AlgorithmVersion, @GitCommitSHA, @GitBranch, @GitLabel, @Exchange, @Symbol,
+                     @AccountBalance, @AccountEquity, @UsedMargin, @FreeMargin, @MarginLevelPct, @PeakEquity, @DrawdownPct, @DailyRealizedPnL,
+                     @TotalTradesToday, @WinningTrades, @LosingTrades, @WinRatePct, @OpenPositionsCount,
+                     @AvgLatencyMs, @AvgSpreadPips, @AvgSlippagePips, @TotalTicksProcessed, @MetricsJSON);
+                END";
+
+                using var conn = new SqlConnection(_connectionString);
+                await conn.OpenAsync();
+                using var cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@TimestampUTC", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@BotID", BuildInfo.AppName);
+                cmd.Parameters.AddWithValue("@AlgorithmName", BuildInfo.AlgorithmName);
+                cmd.Parameters.AddWithValue("@AlgorithmVersion", BuildInfo.Version);
+                cmd.Parameters.AddWithValue("@GitCommitSHA", BuildInfo.GitCommitSha);
+                cmd.Parameters.AddWithValue("@GitBranch", BuildInfo.GitBranch);
+                cmd.Parameters.AddWithValue("@GitLabel", BuildInfo.GitLabel);
+                cmd.Parameters.AddWithValue("@Exchange", "Pepperstone");
+                cmd.Parameters.AddWithValue("@Symbol", "EURUSD");
+                cmd.Parameters.AddWithValue("@AccountBalance", account.Balance);
+                cmd.Parameters.AddWithValue("@AccountEquity", account.Equity);
+                cmd.Parameters.AddWithValue("@UsedMargin", account.UsedMargin);
+                cmd.Parameters.AddWithValue("@FreeMargin", account.FreeMargin);
+                cmd.Parameters.AddWithValue("@MarginLevelPct", account.MarginLevelPct);
+                cmd.Parameters.AddWithValue("@PeakEquity", account.PeakEquity);
+                cmd.Parameters.AddWithValue("@DrawdownPct", account.DrawdownPct);
+                cmd.Parameters.AddWithValue("@DailyRealizedPnL", account.DailyRealizedPnL);
+                cmd.Parameters.AddWithValue("@TotalTradesToday", account.TotalTradesToday);
+                cmd.Parameters.AddWithValue("@WinningTrades", account.WinningTradesToday);
+                cmd.Parameters.AddWithValue("@LosingTrades", account.LosingTradesToday);
+                cmd.Parameters.AddWithValue("@WinRatePct", account.WinRatePct);
+                cmd.Parameters.AddWithValue("@OpenPositionsCount", openPositionsCount);
+                cmd.Parameters.AddWithValue("@AvgLatencyMs", avgLatency);
+                cmd.Parameters.AddWithValue("@AvgSpreadPips", avgSpread);
+                cmd.Parameters.AddWithValue("@AvgSlippagePips", avgSlippage);
+                cmd.Parameters.AddWithValue("@TotalTicksProcessed", totalTicks);
+                cmd.Parameters.AddWithValue("@MetricsJSON", snapshotJson);
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                // Telemetry insertion handles offline database conditions gracefully
+            }
         }
 
         private async Task ProcessLogQueueAsync()
@@ -141,6 +241,14 @@ namespace Logging
                 string filePath = Path.Combine(_logDir, $"{BuildInfo.AppName}_{DateTime.UtcNow:yyyyMMdd}.log");
                 string payloadJson = JsonSerializer.Serialize(new
                 {
+                    algorithm = new
+                    {
+                        name = entry.AlgorithmName,
+                        version = entry.AlgorithmVersion,
+                        git_sha = entry.GitCommitSha,
+                        git_branch = entry.GitBranch,
+                        git_label = entry.GitLabel
+                    },
                     metrics = new
                     {
                         latency_tick_to_order_ms = entry.LatencyMs,
@@ -166,6 +274,14 @@ namespace Logging
             {
                 string payloadJson = JsonSerializer.Serialize(new
                 {
+                    algorithm = new
+                    {
+                        name = entry.AlgorithmName,
+                        version = entry.AlgorithmVersion,
+                        git_sha = entry.GitCommitSha,
+                        git_branch = entry.GitBranch,
+                        git_label = entry.GitLabel
+                    },
                     metrics = new
                     {
                         latency_tick_to_order_ms = entry.LatencyMs,
@@ -204,7 +320,7 @@ namespace Logging
             }
             catch
             {
-                // SQL Server sink handles transient offline states smoothly without blocking the trading loop
+                // SQL Server sink handles transient offline states smoothly
             }
         }
     }
