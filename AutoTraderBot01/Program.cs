@@ -49,6 +49,21 @@ namespace AutoTraderBot01
                         WindowsServiceManager.StopService();
                         return;
 
+                    case "backtest":
+                    case "bt":
+                        string dataPath = "data/seed_data.json";
+                        for (int k = 1; k < args.Length; k++)
+                        {
+                            if ((args[k].ToLowerInvariant() == "-data" || args[k].ToLowerInvariant() == "--data") && k + 1 < args.Length)
+                            {
+                                dataPath = args[k + 1];
+                            }
+                        }
+                        var btLogger = new TelemetryLogger();
+                        var btEngine = new Backtesting.BacktestEngine(btLogger);
+                        await btEngine.RunBacktestAsync(dataPath);
+                        return;
+
                     case "help":
                     case "?":
                         PrintUsage();
