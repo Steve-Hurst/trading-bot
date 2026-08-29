@@ -8,10 +8,10 @@ namespace Config
         public const string AppName = "cookie.autotrader-bot01";
         public const string AlgorithmName = "EURUSD_MeanReversion_RSI_BB";
         public const string Version = "1.0.0.0";
-        public const string BuildDate = "27/08/2026 22:49:42.57";
-        public const string GitCommitSha = "fbde1ff573c6988e52e4a4aeaeb08f30b374e2ee";
+        public const string BuildDate = "29/08/2026  8:18:02.92";
+        public const string GitCommitSha = "05514d4cea5576350955a0fac9065cb1b548ab2f";
         public const string GitBranch = "feature/v1.0.0.0";
-        public const string GitLabel = "v1.0.0.0-pepperstone-eurusd-2-gfbde1ff";
+        public const string GitLabel = "v1.0.0.0-pepperstone-eurusd-3-g05514d4";
         public const string CookieControlToken = "0000000000000000000000000000000000000000000000000000000000000000";
         public const int DefaultPort = 9011;
         public const string ServiceName = "cookie.autotrader-bot01";
