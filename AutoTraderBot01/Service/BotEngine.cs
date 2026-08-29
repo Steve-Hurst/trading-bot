@@ -19,6 +19,7 @@ namespace Service
         public bool IsRunning { get; private set; }
         public string BrokerName => _broker?.BrokerName ?? "Unassigned";
         public string TargetSymbol => _strategy.TargetSymbol;
+        public BotConfiguration Config { get; }
 
         private readonly TelemetryLogger _logger;
         private readonly IStrategy _strategy;
@@ -29,10 +30,11 @@ namespace Service
         private long _tickCount = 0;
         private TickData? _lastTick;
 
-        public BotEngine(TelemetryLogger logger, bool useLiveBroker = false)
+        public BotEngine(TelemetryLogger logger, BotConfiguration? config = null, bool useLiveBroker = false)
         {
             _logger = logger;
-            _useLiveBroker = useLiveBroker;
+            Config = config ?? new BotConfiguration();
+            _useLiveBroker = useLiveBroker || Config.Market.IndexOf("live", StringComparison.OrdinalIgnoreCase) >= 0;
             _strategy = new EURUSDMeanReversionStrategy();
             _riskManager = new RiskManager();
 
@@ -148,6 +150,21 @@ namespace Service
             {
                 is_running = IsRunning,
                 uptime_seconds = (long)_uptimeSw.Elapsed.TotalSeconds,
+                market = Config.Market,
+                entries_traded = Config.Symbols,
+                broker = BrokerName,
+                endpoints = new
+                {
+                    broker_api = Config.BrokerEndpoint,
+                    secrets_vault = Config.SecretsVaultEndpoint,
+                    status_http = $"http://localhost:{Config.StatusPort}",
+                    database_sink = Config.DatabaseSink
+                },
+                required_secrets = new
+                {
+                    secret_names = Config.RequiredSecretNames,
+                    control_token_present = !string.IsNullOrEmpty(BuildInfo.CookieControlToken) && BuildInfo.CookieControlToken != "0000000000000000000000000000000000000000000000000000000000000000"
+                },
                 total_ticks_processed = _tickCount,
                 last_bid = _lastTick?.Bid ?? 0,
                 last_ask = _lastTick?.Ask ?? 0,

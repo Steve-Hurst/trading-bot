@@ -100,4 +100,28 @@ namespace Core.Models
         public int LosingTradesToday { get; set; } = 0;
         public double WinRatePct => TotalTradesToday > 0 ? ((double)WinningTradesToday / TotalTradesToday) * 100.0 : 0.0;
     }
+
+    public class BotConfiguration
+    {
+        public string Market { get; set; } = "Pepperstone_Sandbox";
+        public string Broker { get; set; } = "PepperstoneOpenApiBroker";
+        public string[] Symbols { get; set; } = new[] { "EURUSD" };
+        public int StatusPort { get; set; } = 9011;
+        public string BrokerEndpoint { get; set; } = "demo.ctraderapi.com:5035";
+        public string SecretsVaultEndpoint { get; set; } = "http://localhost:9500";
+        public string DatabaseSink { get; set; } = "[AIv1].[dbo].[ExecutionLogs]";
+        public string[] RequiredSecretNames { get; set; } = new[]
+        {
+            "AutoBot01_Pepperstone_EURUSD-ClientID",
+            "AutoBot01_Pepperstone_EURUSD-Secret",
+            "AutoTrading_Pepperstone_AccountNumber",
+            "AutoBot01_Pepperstone_EURUSD-AccessToken"
+        };
+        public double InitialCapitalGbp { get; set; } = 500.0;
+        public double MaxPositionLotSize { get; set; } = 0.01;
+        public double HardMaxDrawdownPct { get; set; } = 5.0;
+        public double PerTradeStopLossPips { get; set; } = 12.0;
+        public double PerTradeTakeProfitPips { get; set; } = 20.0;
+        public double MaxAllowedSpreadPips { get; set; } = 1.0;
+    }
 }

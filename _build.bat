@@ -24,8 +24,14 @@ set "GIT_LABEL=unknown"
 for /f "tokens=*" %%c in ('git describe --tags --always 2^>nul') do set "GIT_LABEL=%%c"
 
 set "BUILD_DATE=%DATE% %TIME%"
+set "COOKIE_CONTROL_TOKEN=0000000000000000000000000000000000000000000000000000000000000000"
 
-echo Generating AutoTraderBot01\buildinfo.cs (SHA: !GIT_SHA!, Branch: !GIT_BRANCH!, Label: !GIT_LABEL!)...
+echo Requesting build token from Cookie-Control Vault (http://localhost:9500/build?appName=%APP_NAME%)...
+for /f "tokens=*" %%t in ('powershell -Command "try { (Invoke-RestMethod -Uri 'http://localhost:9500/build?appName=%APP_NAME%' -TimeoutSec 3).token } catch { '' }" 2^>nul') do (
+    if not "%%t"=="" set "COOKIE_CONTROL_TOKEN=%%t"
+)
+
+echo Generating AutoTraderBot01\buildinfo.cs (SHA: !GIT_SHA!, Branch: !GIT_BRANCH!, Control Token: !COOKIE_CONTROL_TOKEN!)...
 
 (
 echo // Auto-generated buildinfo for %APP_NAME%
@@ -42,7 +48,7 @@ echo         public const string BuildDate = "!BUILD_DATE!";
 echo         public const string GitCommitSha = "!GIT_SHA!";
 echo         public const string GitBranch = "!GIT_BRANCH!";
 echo         public const string GitLabel = "!GIT_LABEL!";
-echo         public const string CookieControlToken = "0000000000000000000000000000000000000000000000000000000000000000";
+echo         public const string CookieControlToken = "!COOKIE_CONTROL_TOKEN!";
 echo         public const int DefaultPort = 9011;
 echo         public const string ServiceName = "%APP_NAME%";
 echo         public const string ServiceDescription = "Steve Hurst AutoTrader Bot 01 - EURUSD Mean Reversion Pepperstone Execution Engine";

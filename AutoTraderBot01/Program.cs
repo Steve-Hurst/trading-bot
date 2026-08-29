@@ -72,23 +72,89 @@ namespace AutoTraderBot01
             }
 
             bool useLiveBroker = false;
-            int port = BuildInfo.DefaultPort;
+            var config = new Core.Models.BotConfiguration();
 
             for (int i = 0; i < args.Length; i++)
             {
-                string arg = args[i].ToLowerInvariant().TrimStart('-', '/');
-                if (arg == "live") useLiveBroker = true;
-                if (arg == "sim" || arg == "dryrun" || arg == "simulate") useLiveBroker = false;
-                if (arg == "port" && i + 1 < args.Length && int.TryParse(args[i + 1], out int p)) port = p;
+                string rawArg = args[i].ToLowerInvariant().TrimStart('-', '/');
+                string nextVal = (i + 1 < args.Length && !args[i + 1].StartsWith("-") && !args[i + 1].StartsWith("/")) ? args[i + 1] : string.Empty;
+
+                if (rawArg == "live")
+                {
+                    useLiveBroker = true;
+                    config.Market = "Pepperstone_Live";
+                }
+                else if (rawArg == "sim" || rawArg == "dryrun" || rawArg == "simulate")
+                {
+                    useLiveBroker = false;
+                    config.Market = "Pepperstone_Sandbox";
+                }
+                else if ((rawArg == "market" || rawArg == "exchange") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.Market = nextVal;
+                    i++;
+                }
+                else if ((rawArg == "symbol" || rawArg == "entry") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.Symbols = new[] { nextVal.ToUpperInvariant() };
+                    i++;
+                }
+                else if ((rawArg == "symbols" || rawArg == "entries") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.Symbols = nextVal.ToUpperInvariant().Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    i++;
+                }
+                else if (rawArg == "broker" && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.Broker = nextVal;
+                    i++;
+                }
+                else if (rawArg == "port" && int.TryParse(nextVal, out int p))
+                {
+                    config.StatusPort = p;
+                    i++;
+                }
+                else if ((rawArg == "endpoint" || rawArg == "broker-endpoint") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.BrokerEndpoint = nextVal;
+                    i++;
+                }
+                else if ((rawArg == "secrets-endpoint" || rawArg == "vault") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.SecretsVaultEndpoint = nextVal;
+                    i++;
+                }
+                else if ((rawArg == "secretnames" || rawArg == "secrets" || rawArg == "secretname") && !string.IsNullOrEmpty(nextVal))
+                {
+                    config.RequiredSecretNames = nextVal.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    i++;
+                }
+                else if (rawArg == "config" && !string.IsNullOrEmpty(nextVal) && File.Exists(nextVal))
+                {
+                    try
+                    {
+                        string json = File.ReadAllText(nextVal);
+                        var loaded = System.Text.Json.JsonSerializer.Deserialize<Core.Models.BotConfiguration>(json);
+                        if (loaded != null) config = loaded;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[WARN] Could not parse config file '{nextVal}': {ex.Message}");
+                    }
+                    i++;
+                }
             }
 
-            Console.Title = $"{BuildInfo.AppName} v{BuildInfo.Version} [{ (useLiveBroker ? "LIVE PEPPERSTONE" : "SIMULATED PEPPERSTONE") }]";
+            Console.Title = $"{BuildInfo.AppName} v{BuildInfo.Version} [{config.Market}]";
             Console.WriteLine("================================================================================");
-            Console.WriteLine($" {BuildInfo.AppName} v{BuildInfo.Version} - Pepperstone AutoTrading Bot 01");
-            Console.WriteLine($" Mode: {(useLiveBroker ? "LIVE PEPPERSTONE (cTrader Open API)" : "SIMULATED PEPPERSTONE (Sandbox)")}");
-            Console.WriteLine($" Asset: EURUSD | Initial Capital: £500.00 | Lot Size: 0.01 micro-lot");
-            Console.WriteLine($" Max Drawdown Guardrail: 5.0% (£25.00) | Stop-Loss: 12 pips | Take-Profit: 20 pips");
-            Console.WriteLine($" HTTP Status API: http://localhost:{port}/status");
+            Console.WriteLine($" {BuildInfo.AppName} v{BuildInfo.Version} - {BuildInfo.ServiceDescription}");
+            Console.WriteLine($" Target Market: {config.Market} | Broker: {config.Broker}");
+            Console.WriteLine($" Entries Traded: {string.Join(", ", config.Symbols)}");
+            Console.WriteLine($" Broker Endpoint: {config.BrokerEndpoint}");
+            Console.WriteLine($" Secrets Vault: {config.SecretsVaultEndpoint} (Token: {(!string.IsNullOrEmpty(BuildInfo.CookieControlToken) && BuildInfo.CookieControlToken != "0000000000000000000000000000000000000000000000000000000000000000" ? "LOADED" : "SANDBOX_DEFAULT")})");
+            Console.WriteLine($" Required Secrets: {string.Join(", ", config.RequiredSecretNames)}");
+            Console.WriteLine($" Initial Capital: £{config.InitialCapitalGbp:F2} | Micro-lot: {config.MaxPositionLotSize} | Max DD: {config.HardMaxDrawdownPct}%");
+            Console.WriteLine($" HTTP Status API: http://localhost:{config.StatusPort}/status");
             Console.WriteLine("================================================================================");
 
             var cts = new CancellationTokenSource();
@@ -100,8 +166,8 @@ namespace AutoTraderBot01
             };
 
             var logger = new TelemetryLogger();
-            var engine = new BotEngine(logger, useLiveBroker: useLiveBroker);
-            var httpServer = new StatusHttpServer(engine, logger, port: port);
+            var engine = new BotEngine(logger, config: config, useLiveBroker: useLiveBroker);
+            var httpServer = new StatusHttpServer(engine, logger, port: config.StatusPort);
 
             httpServer.Start();
 
@@ -128,14 +194,22 @@ namespace AutoTraderBot01
         {
             Console.WriteLine($"Usage: {BuildInfo.AppName} [options]");
             Console.WriteLine("Options:");
-            Console.WriteLine("  -version             Print application version");
-            Console.WriteLine("  -status              Query bot health and execution metrics");
-            Console.WriteLine("  -sim / -dryrun       Run in simulated market sandbox (Default)");
-            Console.WriteLine("  -live                Run connected to Live Pepperstone cTrader Open API");
-            Console.WriteLine("  -port <port>         Override HTTP monitoring port (Default: 9011)");
-            Console.WriteLine("  -install             Install as Windows Service with auto-recovery");
-            Console.WriteLine("  -remove              Remove Windows Service");
-            Console.WriteLine("  -start / -stop       Start/stop the Windows Service");
+            Console.WriteLine("  -version                     Print application version and build metadata");
+            Console.WriteLine("  -status                      Query live bot health, open entries, and metrics");
+            Console.WriteLine("  -market <name>               Target market/exchange (e.g. Pepperstone_Sandbox, IG_SpreadBet)");
+            Console.WriteLine("  -symbol <name>               Instrument/entry being traded (e.g. EURUSD, GBPUSD)");
+            Console.WriteLine("  -symbols <list>              Comma-separated list of instruments to trade");
+            Console.WriteLine("  -broker <name>               Broker adapter (PepperstoneOpenApiBroker, SimulatedBroker)");
+            Console.WriteLine("  -endpoint <url>              Configurable broker connection endpoint");
+            Console.WriteLine("  -vault <url>                 Cookie-Control Secrets Vault endpoint (Default: http://localhost:9500)");
+            Console.WriteLine("  -secretnames <list>          Comma-separated list of secret key names for auth tokens");
+            Console.WriteLine("  -config <path.json>          Path to JSON configuration file");
+            Console.WriteLine("  -sim / -dryrun               Run in simulated market sandbox (Default)");
+            Console.WriteLine("  -live                        Run connected to Live Pepperstone cTrader Open API");
+            Console.WriteLine("  -port <port>                 Override HTTP monitoring port (Default: 9011)");
+            Console.WriteLine("  -install                     Install as Windows Service with auto-recovery");
+            Console.WriteLine("  -remove                      Remove Windows Service");
+            Console.WriteLine("  -start / -stop               Start/stop the Windows Service");
         }
     }
 }

@@ -34,18 +34,27 @@ namespace Broker.Pepperstone
         {
             try
             {
-                // Fetch credentials from centralized Cookie Secrets service
-                _clientId = await GetSecrets.GetSecretAsync("PEPPERSTONE-CLIENT-ID");
-                _clientSecret = await GetSecrets.GetSecretAsync("PEPPERSTONE-CLIENT-SECRET");
-                _accessToken = await GetSecrets.GetSecretAsync("PEPPERSTONE-ACCESS-TOKEN");
-                _accountId = await GetSecrets.GetSecretAsync("PEPPERSTONE-ACCOUNT-ID");
+                // Fetch credentials from centralized Cookie Secrets service (supporting custom and standard secret names)
+                _clientId = await GetSecrets.GetSecretAsync("AutoBot01_Pepperstone_EURUSD-ClientID");
+                if (string.IsNullOrEmpty(_clientId)) _clientId = await GetSecrets.GetSecretAsync("PEPPERSTONE-CLIENT-ID");
+
+                _clientSecret = await GetSecrets.GetSecretAsync("AutoBot01_Pepperstone_EURUSD-Secret");
+                if (string.IsNullOrEmpty(_clientSecret)) _clientSecret = await GetSecrets.GetSecretAsync("PEPPERSTONE-CLIENT-SECRET");
+
+                _accessToken = await GetSecrets.GetSecretAsync("AutoBot01_Pepperstone_EURUSD-AccessToken");
+                if (string.IsNullOrEmpty(_accessToken)) _accessToken = await GetSecrets.GetSecretAsync("PEPPERSTONE-ACCESS-TOKEN");
+
+                _accountId = await GetSecrets.GetSecretAsync("AutoTrading_Pepperstone_AccountNumber");
+                if (string.IsNullOrEmpty(_accountId)) _accountId = await GetSecrets.GetSecretAsync("AutoBot_Pepperstone_AccountNumber");
+                if (string.IsNullOrEmpty(_accountId)) _accountId = await GetSecrets.GetSecretAsync("PEPPERSTONE-ACCOUNT-ID");
+
                 _environment = (await GetSecrets.GetSecretAsync("PEPPERSTONE-ENV")).ToLowerInvariant();
                 if (string.IsNullOrEmpty(_environment)) _environment = "demo";
 
                 if (string.IsNullOrEmpty(_accessToken) || string.IsNullOrEmpty(_accountId))
                 {
                     _logger.Warn("PepperstoneOpenApiBroker.ConnectAsync", 
-                        "Live Pepperstone credentials missing in Secrets service. Operating in connected standby mode.");
+                        $"Pepperstone credentials check - AccountId: '{_accountId}', TokenPresent: {!string.IsNullOrEmpty(_accessToken)}. Missing in Secrets service. Operating in connected standby mode.");
                     IsConnected = false;
                     return false;
                 }

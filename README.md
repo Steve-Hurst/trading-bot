@@ -1,12 +1,13 @@
 # `cookie.autotrader-bot01` - Pepperstone EUR/USD AutoTrading Bot
 
 ## 1. Overview & Purpose
-`cookie.autotrader-bot01` is a high-frequency, deterministic algorithmic trading daemon built in C# (.NET 9) executing on the local `Cookie` Windows workstation. It executes an institutional-grade **Mean Reversion & Volatility Band Strategy** on **EUR/USD** with ultra-low latency and strict risk invariants.
+`cookie.autotrader-bot01` is a high-frequency, deterministic algorithmic trading daemon built in C# (.NET 9) executing on the local `Cookie` Windows workstation. It executes an institutional-grade **Mean Reversion & Volatility Band Strategy** on **EUR/USD** (or user-specified symbols) with ultra-low latency and strict risk invariants.
 
 ### Key Operational Invariants:
 * **Initial Account Capital:** £500.00
-* **Target Asset:** EUR/USD (Major FX / Spread Betting)
-* **Position Sizing:** 0.01 micro-lot ($1,000 unit base / £0.10 per point)
+* **Target Market / Exchange:** Configurable via `-market` (Default: `Pepperstone_Sandbox` / `Pepperstone_Live` / `IG_SpreadBet`)
+* **Target Assets / Entries Traded:** Configurable via `-symbol` / `-symbols` (Default: `EURUSD`)
+* **Position Sizing:** 0.01 micro-lot ($1,000 unit base / £0.10 per point stake)
 * **Hard Drawdown Guardrail:** ≤ 5.0% (£25.00 total account drawdown ceiling)
 * **Per-Trade Stop Loss:** 12 pips (~£0.91 / ~0.18% account equity)
 * **Per-Trade Take Profit:** 20 pips (~£1.52 / ~0.30% account equity)
@@ -19,23 +20,38 @@
 ## 2. Architecture & Ecosystem Compliance
 
 * **App Registry Name:** `cookie.autotrader-bot01`
-* **Assigned HTTP Port:** `:9011`
+* **Assigned HTTP Port:** `:9011` (Configurable via `-port`)
 * **File Logs Directory:** `E:\Logs\cookie.autotrader-bot01_Logs\`
 * **Database Telemetry Sink:** `[AIv1].[dbo].[ExecutionLogs]`
 * **Code Warehouse Integration:** Hydrated automatically via `_Commit.bat` and indexed in `[AIv1].[dbo].[CodeSymbols]`
 * **Deployment Location:** `C:\Batch\bin\cookie.autotrader-bot01.exe`
 * **Windows Service Name:** `cookie.autotrader-bot01`
 * **Windows Service Description:** `Steve Hurst AutoTrader Bot 01 - EURUSD Mean Reversion Pepperstone Execution Engine`
+* **Cookie-Control Secrets Vault:** Embeds token during `_build.bat` from `http://localhost:9500/build?appName=cookie.autotrader-bot01`
 
 ---
 
-## 3. HTTP Monitoring & Health Endpoints (Port `:9011`)
+## 3. Configurable Endpoints & Secrets Resolution
+
+The bot dynamically manages and reports all active endpoints and authentication secrets:
+
+| System / Provider | Config Flag | Default Endpoint | Required Secret Names |
+| :--- | :--- | :--- | :--- |
+| **Broker API (Pepperstone)** | `-endpoint <url>` | `demo.ctraderapi.com:5035` | `PEPPERSTONE_CLIENT_ID`<br/>`PEPPERSTONE_CLIENT_SECRET`<br/>`PEPPERSTONE_ACCOUNT_ID`<br/>`PEPPERSTONE_ACCESS_TOKEN` |
+| **Broker API (IG Index)** | `-endpoint <url>` | `api.ig.com/gateway/deal` | `IG_API_KEY`<br/>`IG_ACCOUNT_ID`<br/>`IG_IDENTIFIER`<br/>`IG_PASSWORD` |
+| **Secrets Vault** | `-vault <url>` | `http://localhost:9500` | Token requested automatically in `_build.bat` |
+| **Status Health API** | `-port <int>` | `http://localhost:9011/status`| Open HTTP port (no auth required) |
+| **Database Sink** | Config / DB | `[AIv1].[dbo].[ExecutionLogs]` | `SQL-AI-SERVER`, `SQL-AI-DATABASE`, etc. |
+
+---
+
+## 4. HTTP Monitoring & Health Endpoints (Port `:9011`)
 
 The bot exposes an HTTP server on `http://localhost:9011` compatible with `SWV4Status` and `cookie.cookieHealthCheck`:
 
 | Endpoint | Method | Purpose |
 | :--- | :---: | :--- |
-| `/status` | `GET` | Returns full JSON diagnostic state: uptime, account equity, used margin, drawdown %, open positions, win rate, daily PnL, latency. |
+| `/status` | `GET` | Returns full JSON diagnostic state: target market, entries traded, endpoints list, required secrets, uptime, account equity, used margin, drawdown %, open positions, win rate, daily PnL, latency. |
 | `/cacherefresh` | `GET` | Reloads parameters and secrets from the local Secrets service without process restart. |
 | `/pause` | `GET` | Pauses new entry signals (leaves open positions managed by stop-loss/take-profit). |
 | `/resume` | `GET` | Resumes automated trading. |
@@ -46,10 +62,26 @@ The bot exposes an HTTP server on `http://localhost:9011` compatible with `SWV4S
 {
   "app": "cookie.autotrader-bot01",
   "version": "1.0.0.0",
-  "build_date": "2026-08-26 22:55:00",
+  "build_date": "2026-08-29 12:00:00",
   "status": "active",
-  "broker": "Pepperstone_Simulated",
-  "symbol": "EURUSD",
+  "market": "Pepperstone_Sandbox",
+  "entries_traded": [ "EURUSD" ],
+  "broker": "PepperstoneOpenApiBroker",
+  "endpoints": {
+    "broker_api": "demo.ctraderapi.com:5035",
+    "secrets_vault": "http://localhost:9500",
+    "status_http": "http://localhost:9011",
+    "database_sink": "[AIv1].[dbo].[ExecutionLogs]"
+  },
+  "required_secrets": {
+    "secret_names": [
+      "PEPPERSTONE_CLIENT_ID",
+      "PEPPERSTONE_CLIENT_SECRET",
+      "PEPPERSTONE_ACCOUNT_ID",
+      "PEPPERSTONE_ACCESS_TOKEN"
+    ],
+    "control_token_present": true
+  },
   "metrics": {
     "is_running": true,
     "uptime_seconds": 120,
@@ -76,20 +108,35 @@ The bot exposes an HTTP server on `http://localhost:9011` compatible with `SWV4S
 
 ---
 
-## 4. CLI Flags & Service Management
+## 5. CLI Flags & Runtime Configuration
 
 ```bash
+# Print version and build metadata
+cookie.autotrader-bot01.exe -version
+
+# Query running status via HTTP API
+cookie.autotrader-bot01.exe -status
+
 # Run in simulated sandbox mode (Default)
 cookie.autotrader-bot01.exe -sim
 
 # Run connected to Live Pepperstone cTrader Open API
 cookie.autotrader-bot01.exe -live
 
-# Check version
-cookie.autotrader-bot01.exe -version
+# Run against specific market and entries
+cookie.autotrader-bot01.exe -market Pepperstone_Live -symbols EURUSD,GBPUSD
 
-# Query running status
-cookie.autotrader-bot01.exe -status
+# Custom broker and secrets vault endpoint
+cookie.autotrader-bot01.exe -endpoint demo.ctraderapi.com:5035 -vault http://localhost:9500
+
+# Custom secret key names
+cookie.autotrader-bot01.exe -secretnames PEPPERSTONE_CLIENT_ID,PEPPERSTONE_CLIENT_SECRET,PEPPERSTONE_ACCOUNT_ID,PEPPERSTONE_ACCESS_TOKEN
+
+# Override HTTP monitoring port
+cookie.autotrader-bot01.exe -port 9015
+
+# Load from complete JSON configuration file
+cookie.autotrader-bot01.exe -config C:\Batch\Configs\bot01_config.json
 
 # Install as Windows Service with SCM 3-tier auto-recovery (5s, 10s, 30s)
 cookie.autotrader-bot01.exe -install
@@ -102,8 +149,14 @@ cookie.autotrader-bot01.exe -remove
 
 ---
 
-## 5. cTrader Native cBot Option
-For traders preferring to run directly inside the Pepperstone cTrader desktop GUI:
-* Open cTrader Automate -> New cBot
-* Copy and paste the contents of [`cTrader_cBot/Pepperstone_AutoBot01_EURUSD.cs`](file:///E:/GDrive/c%23/trading-bot/cTrader_cBot/Pepperstone_AutoBot01_EURUSD.cs)
-* Build and attach to EUR/USD 1-minute or 5-minute chart.
+## 6. Build, Commit & Deployment Scripts
+
+* **`_build.bat`**:
+  1. Requests build token and registration from `http://localhost:9500/build?appName=cookie.autotrader-bot01`.
+  2. Generates `buildinfo.cs` with Git commit SHA, branch, date, and `CookieControlToken`.
+  3. Compiles executable with `dotnet publish -c Release -r win-x64`.
+  4. Deploys binary to `C:\Batch\bin\cookie.autotrader-bot01.exe` via `C:\Batch\_deploy.bat`.
+
+* **`_commit.bat`**:
+  1. Stages, commits, and pushes changes to GitHub (`github.com/Steve-Hurst/trading-bot.git`).
+  2. Invokes `C:\Batch\bin\CodeScrapper.exe` to index source AST into `[AIv1].[dbo].[CodeSymbols]` and `[AIv1].[dbo].[CodeBaseWarehouse]`.
