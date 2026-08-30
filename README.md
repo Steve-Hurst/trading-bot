@@ -1,28 +1,30 @@
-# `cookie.autotrader-bot01` - Pepperstone EUR/USD AutoTrading Bot
+# AI-Supervised Algorithmic AutoTrading System (C# .NET 9)
 
-## 1. Overview & Purpose
-`cookie.autotrader-bot01` is a high-frequency, deterministic algorithmic trading daemon built in C# (.NET 9) executing on the local `Cookie` Windows workstation. It executes an institutional-grade **Mean Reversion & Volatility Band Strategy** on **EUR/USD** (or user-specified symbols) with ultra-low latency and strict risk invariants.
+This solution contains isolated, deterministic algorithmic trading daemons running locally on the `Cookie` workstation:
 
-### Key Operational Invariants:
+1. **`cookie.autotrader-bot01` (Port `:9011`):** Pepperstone cTrader Open API Execution Engine (EUR/USD Mean Reversion). Standby mode pending 4-day Pepperstone API key delivery.
+2. **`cookie.autotrader-ig01` (Port `:9012`):** IG Index UK Spread Betting Engine (EUR/USD Mean Reversion & GBP/USD London Breakout). 100% Tax-Free micro-spread betting (£0.10/pt stake).
+
+---
+
+## 1. Overview & Operational Invariants
 * **Initial Account Capital:** £500.00
-* **Target Market / Exchange:** Configurable via `-market` (Default: `Pepperstone_Sandbox` / `Pepperstone_Live` / `IG_SpreadBet`)
-* **Target Assets / Entries Traded:** Configurable via `-symbol` / `-symbols` (Default: `EURUSD`)
-* **Position Sizing:** 0.01 micro-lot ($1,000 unit base / £0.10 per point stake)
+* **Position Sizing:** Micro-stake (£0.10/point spread bet or 0.01 micro-lot)
 * **Hard Drawdown Guardrail:** ≤ 5.0% (£25.00 total account drawdown ceiling)
-* **Per-Trade Stop Loss:** 12 pips (~£0.91 / ~0.18% account equity)
-* **Per-Trade Take Profit:** 20 pips (~£1.52 / ~0.30% account equity)
+* **Per-Trade Stop Loss:** 12–15 pips (~£0.90 – £1.50 risk)
+* **Per-Trade Take Profit:** 20–30 pips (~£1.50 – £3.00 profit)
 * **Risk-to-Reward Ratio:** ≥ 1:1.67
 * **Max Allowed Spread:** ≤ 1.0 pip (orders rejected during news or spread widening)
-* **Active Session Window:** 07:00 – 19:00 UTC (London & NY session overlap)
+* **Active Session Window:** London & NY session overlap (07:00 – 19:00 UTC)
 
 ---
 
 ## 2. Architecture & Ecosystem Compliance
 
-* **App Registry Name:** `cookie.autotrader-bot01`
-* **Assigned HTTP Port:** `:9011` (Configurable via `-port`)
-* **File Logs Directory:** `E:\Logs\cookie.autotrader-bot01_Logs\`
-* **Database Telemetry Sink:** `[AIv1].[dbo].[ExecutionLogs]`
+* **Bot 01 (Pepperstone):** `E:\GDrive\c#\trading-bot\AutoTraderBot01\` → Port `:9011` → `C:\Batch\bin\cookie.autotrader-bot01.exe`
+* **Bot IG (IG Index):** `E:\GDrive\c#\trading-bot\AutoTraderBotIG\` → Port `:9012` → `C:\Batch\bin\cookie.autotrader-ig01.exe`
+* **File Logs Directory:** `E:\Logs\cookie.autotrader-bot01_Logs\` and `E:\Logs\cookie.autotrader-ig01_Logs\`
+* **Database Telemetry Sink:** `[AIv1].[dbo].[ExecutionLogs]` and `[dbo].[BotMetrics]`
 * **Code Warehouse Integration:** Hydrated automatically via `_Commit.bat` and indexed in `[AIv1].[dbo].[CodeSymbols]`
 * **Deployment Location:** `C:\Batch\bin\cookie.autotrader-bot01.exe`
 * **Windows Service Name:** `cookie.autotrader-bot01`
