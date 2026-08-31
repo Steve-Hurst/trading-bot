@@ -1,8 +1,3 @@
-E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\cookie.autotrader-bot01.exe
-E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\cookie.autotrader-bot01.deps.json
-E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\cookie.autotrader-bot01.runtimeconfig.json
-E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\cookie.autotrader-bot01.dll
-E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\cookie.autotrader-bot01.pdb
 E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\Microsoft.Bcl.Cryptography.dll
 E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\Microsoft.Data.SqlClient.dll
 E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\Microsoft.Data.SqlClient.Extensions.Abstractions.dll
@@ -47,8 +42,13 @@ E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\AutoTraderBo
 E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\AutoTraderBot01.csproj.CoreCompileInputs.cache
 E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\AutoTraderBot01.sourcelink.json
 E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\AutoTrad.72AD5EA9.Up2Date
-E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\cookie.autotrader-bot01.dll
-E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\refint\cookie.autotrader-bot01.dll
-E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\cookie.autotrader-bot01.pdb
 E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\AutoTraderBot01.genruntimeconfig.cache
-E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\ref\cookie.autotrader-bot01.dll
+E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\pyramidai.autotrader-bot01.exe
+E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\pyramidai.autotrader-bot01.deps.json
+E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\pyramidai.autotrader-bot01.runtimeconfig.json
+E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\pyramidai.autotrader-bot01.dll
+E:\GDrive\c#\trading-bot\AutoTraderBot01\bin\Release\net9.0\win-x64\pyramidai.autotrader-bot01.pdb
+E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\pyramidai.autotrader-bot01.dll
+E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\refint\pyramidai.autotrader-bot01.dll
+E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\pyramidai.autotrader-bot01.pdb
+E:\GDrive\c#\trading-bot\AutoTraderBot01\obj\Release\net9.0\win-x64\ref\pyramidai.autotrader-bot01.dll

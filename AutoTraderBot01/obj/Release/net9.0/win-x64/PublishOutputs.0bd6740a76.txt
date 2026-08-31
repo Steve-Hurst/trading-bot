@@ -1,2 +1,2 @@
-E:\GDrive\c#\trading-bot\bin\cookie.autotrader-bot01.pdb
-E:\GDrive\c#\trading-bot\bin\cookie.autotrader-bot01.exe
+E:\GDrive\c#\trading-bot\bin\pyramidai.autotrader-bot01.pdb
+E:\GDrive\c#\trading-bot\bin\pyramidai.autotrader-bot01.exe
