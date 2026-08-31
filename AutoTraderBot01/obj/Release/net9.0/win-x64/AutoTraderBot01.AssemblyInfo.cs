@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("cookie.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9873106c27b2b301c98b20e4229435c7a15ca9da")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f9c7bad4434dc73fda01c64de9bf95376c4766a")]
 [assembly: System.Reflection.AssemblyProductAttribute("cookie.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyTitleAttribute("cookie.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

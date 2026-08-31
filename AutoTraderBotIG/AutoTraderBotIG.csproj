@@ -5,7 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>cookie.autotrader-ig01</AssemblyName>
+    <AssemblyName>pyramidai.autotrader-ig01</AssemblyName>
     <RootNamespace>AutoTraderBotIG</RootNamespace>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>

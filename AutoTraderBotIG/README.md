@@ -1,6 +1,6 @@
-# Cookie AutoTrader Bot IG (`cookie.autotrader-ig01`)
+# Cookie AutoTrader Bot IG (`pyramidai.autotrader-ig01`)
 
-**Application Name:** `cookie.autotrader-ig01`  
+**Application Name:** `pyramidai.autotrader-ig01`  
 **Description:** Steve Hurst AutoTrader IG Bot 01 - Spread Betting Execution Engine (IG Index UK)  
 **Port:** `9012`  
 **Language / Runtime:** C# .NET 9  
@@ -8,7 +8,7 @@
 **Default Instrument:** `CS.D.EURUSD.TODAY.IP` (EUR/USD)  
 **Stake:** £0.10 / point (Micro-risk allocation on £500 initial capital)  
 **Database Sink:** `[AIv1].[dbo].[ExecutionLogs]` & `[BotMetrics]`  
-**Logs:** `E:\Logs\cookie.autotrader-ig01_Logs\`  
+**Logs:** `E:\Logs\pyramidai.autotrader-ig01_Logs\`  
 
 ---
 
@@ -16,12 +16,12 @@
 
 ### Simulated Sandbox Mode (Default)
 ```cmd
-C:\Batch\bin\cookie.autotrader-ig01.exe -sim
+C:\Batch\bin\pyramidai.autotrader-ig01.exe -sim
 ```
 
 ### Live / Demo IG API Connection
 ```cmd
-C:\Batch\bin\cookie.autotrader-ig01.exe -live -symbol CS.D.EURUSD.TODAY.IP
+C:\Batch\bin\pyramidai.autotrader-ig01.exe -live -symbol CS.D.EURUSD.TODAY.IP
 ```
 
 ### Query Live Status
@@ -42,8 +42,8 @@ curl http://localhost:9012/status
 
 ## 3. Windows Service Management
 ```cmd
-cookie.autotrader-ig01.exe -install
-cookie.autotrader-ig01.exe -start
-cookie.autotrader-ig01.exe -stop
-cookie.autotrader-ig01.exe -remove
+pyramidai.autotrader-ig01.exe -install
+pyramidai.autotrader-ig01.exe -start
+pyramidai.autotrader-ig01.exe -stop
+pyramidai.autotrader-ig01.exe -remove
 ```
