@@ -2,11 +2,11 @@
 setlocal enabledelayedexpansion
 
 if "%~1"=="" ( set "LOG_DIR=C:\Temp\BuildLogs" ) else ( set "LOG_DIR=%~1" )
-if "%~2"=="" ( set "LOG_FILE=build_cookie.autotrader-ig01.log" ) else ( set "LOG_FILE=%~2" )
+if "%~2"=="" ( set "LOG_FILE=build_pyramidai.autotrader-ig01.log" ) else ( set "LOG_FILE=%~2" )
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
 set "PROJ_DIR=%~dp0"
-set "APP_NAME=cookie.autotrader-ig01"
+set "APP_NAME=pyramidai.autotrader-ig01"
 set "BIN_DIR=%PROJ_DIR%bin"
 
 echo %DATE% %TIME% Extracting Git metadata for %APP_NAME%...
