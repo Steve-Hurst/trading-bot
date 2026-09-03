@@ -28,7 +28,7 @@ namespace Secrets {
             try {
                 string targetApp = string.IsNullOrEmpty(secretNameParam) ? BuildInfo.AppName : appNameParam;
                 string secretName = string.IsNullOrEmpty(secretNameParam) ? appNameParam : secretNameParam;
-                string token = string.IsNullOrEmpty(BuildInfo.CookieControlToken) ? ActiveToken : BuildInfo.CookieControlToken;
+                string token = string.IsNullOrEmpty(BuildInfo.pyramidaiControlToken) ? ActiveToken : BuildInfo.pyramidaiControlToken;
 
                 DateTime now = DateTime.UtcNow;
                 if (now.Minute == 59 && now.Second >= 55) {
@@ -52,7 +52,7 @@ namespace Secrets {
                     string respJson = await response.Content.ReadAsStringAsync();
                     var resObj = JsonSerializer.Deserialize<SecretResponse>(respJson);
                     string rawVal = resObj?.secret ?? string.Empty;
-                    string decodedVal = Uri.UnescapeDataString(rawVal);
+                    string decodedVal = Uri.UnescapeDataString(rawVal.Replace("+", " "));
                     
                     return decodedVal;
                 }
