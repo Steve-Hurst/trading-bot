@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("pyramidai.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1acaf21a36961e7f38a334f105723154ed7d0053")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74446c14774b3eb9242449c19eb72a22b9eb0869")]
 [assembly: System.Reflection.AssemblyProductAttribute("pyramidai.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyTitleAttribute("pyramidai.autotrader-bot01")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
