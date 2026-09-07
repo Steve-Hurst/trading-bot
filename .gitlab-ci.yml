@@ -1,0 +1,26 @@
+stages:
+  - test
+
+# Python Testing Job
+test_python:
+  stage: test
+  image: python:3.10
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - pytest
+  only:
+    - main
+    - merge_requests
+
+# Go Testing Job
+test_go:
+  stage: test
+  image: golang:1.20
+  before_script:
+    - go mod tidy
+  script:
+    - go test ./...
+  only:
+    - main
+    - merge_requests

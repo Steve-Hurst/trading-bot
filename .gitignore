@@ -1,0 +1,48 @@
+# ==============================================================================
+# Universal PyramidAI Exclusions
+# ==============================================================================
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.pdb
+*.obj
+*.o
+*.a
+*.lib
+*.exp
+*.msi
+
+# Logs
+*.log
+logs/
+*Logs/
+[Ll]ogs/
+C:/Temp/CommitLogs/
+
+# AI Tool Folders
+.claude/
+.opencode/
+.oopncode/
+.gemini/
+.agents/
+
+# Ecosystem Security
+vault.dat
+seeddata/
+*secrets.json
+
+# ==============================================================================
+# C# / .NET Language Specific
+# ==============================================================================
+[Bb]in/
+[Oo]bj/
+[Tt]est[Rr]esults/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+_ReSharper*/
+*.dotCover

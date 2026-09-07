@@ -1,0 +1,1 @@
+Python strategies (long/short, trend, etc.) 
